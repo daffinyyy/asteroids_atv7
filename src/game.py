@@ -21,6 +21,15 @@ class Game:
     # Initialize pygame, shared UI resources, and the initial scene state.
     def __init__(self):
         pg.init()
+
+        #play with joystick
+        pg.joystick.init()
+        joystick = None
+        if pg.joystick.get_count() > 0:
+            joystick = pg.joystick.Joystick(0)
+            joystick.init()
+            print(f"Controle conectado: {joystick.get_name()}")
+
         if C.RANDOM_SEED is not None:
             random.seed(C.RANDOM_SEED)
         self.screen = pg.display.set_mode((C.WIDTH, C.HEIGHT))
@@ -41,6 +50,8 @@ class Game:
                 if e.type == pg.QUIT:
                     pg.quit()
                     sys.exit(0)
+
+                #keyboard controllers
                 if e.type == pg.KEYDOWN:
                     # ESC: encerra o jogo nas cenas menu/play; volta ao menu no game over
                     if e.key == pg.K_ESCAPE:
@@ -60,6 +71,20 @@ class Game:
                         #     self.world.try_dash()
                         if e.key == pg.K_RSHIFT:
                             self.world.try_spread()
+
+                #joystick controllers
+                if e.type == pg.JOYBUTTONDOWN:
+                    if e.button == C.JOYSTICK_FIRE:
+                        self.world.try_fire()
+                    elif e.button == C.JOYSTICK_SHIELD:
+                        self.world.try_shield()
+                    elif e.button == C.JOYSTICK_HYPERSPACE:
+                        self.world.hyperspace()
+                    elif e.button == C.JOYSTICK_SPREAD:
+                        self.world.try_spread()
+                    elif e.button == C.JOYSTICK_EXIT:
+                        pg.quit()
+                        sys.exit(0)
       
       
                     elif self.scene.name == "menu":

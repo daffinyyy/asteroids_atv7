@@ -1,10 +1,10 @@
-# Asteroids ATV6
+# Asteroids ATV7
 
 Projeto desenvolvido a partir de um repositório base do jogo Asteroids em Pygame, com o objetivo de estudar a arquitetura do software, propor novas mecânicas e implementá-las utilizando versionamento com branches e pull requests.
 
 ## Objetivo da atividade
 
-A atividade consiste em analisar o código-fonte do jogo Asteroids, propor novas mecânicas e implementá-las sem alterar a arquitetura principal do sistema, além de modelar a solução utilizando C4.
+A atividade consiste em analisar o código-fonte do jogo Asteroids, propor novas mecânicas e implementá-las sem alterar a arquitetura principal do sistema, adicionar portabilidade para controle joystick, além de modelar a solução utilizando C4.
 
 ## Repositório base
 

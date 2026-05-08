@@ -196,17 +196,32 @@ class Ship(pg.sprite.Sprite):
         
         self.spread_cool = 0.0
 
-    def control(self, keys: pg.key.ScancodeWrapper, dt: float):
+    def control(self, keys: pg.key.ScancodeWrapper, dt: float, joystick=None):
         # Apply rotation, thrust, and friction from the current input state.
         # slow = getattr(self, "slow_factor", 1) #efeito do parasita
+        left = keys[pg.K_LEFT]
+        right = keys[pg.K_RIGHT]
+        up = keys[pg.K_UP]
 
-        if keys[pg.K_LEFT]:
+        #joystick controls
+        if joystick:
+            axis_y = joystick.get_axis(C.JOYSTICK_AXIS_Y)
+            LT = joystick.get_axis(C.JOYSTICK_LEFT)
+            RT = joystick.get_axis(C.JOYSTICK_RIGHT)
+
+            if axis_y < -(C.JOYSTICK_ANALOG_DRIFT):
+                up = True
+            if LT > C.JOYSTICK_ANALOG_DRIFT:
+                left = True
+            if RT > C.JOYSTICK_ANALOG_DRIFT:
+                right = True
+
+        #rotação
+        if left:
             self.angle -= C.SHIP_TURN_SPEED * dt
-        if keys[pg.K_RIGHT]:
+        if right:
             self.angle += C.SHIP_TURN_SPEED * dt
-        # if self.is_dashing:
-        #     return
-        if keys[pg.K_UP]:
+        if up:
             self.vel += angle_to_vec(self.angle) * C.SHIP_THRUST * dt
         self.vel *= C.SHIP_FRICTION
 
