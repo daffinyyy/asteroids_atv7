@@ -8,7 +8,7 @@ import pygame as pg
 
 import config as C
 from sprites import (
-    Asteroid, BossBullet, PowerAsteroid, Ship, UFO, BlackHole, ClockItem, LifeItem
+    Asteroid, PowerAsteroid, Ship, UFO, BlackHole, Parasite, ClockItem, LifeItem
 )
 from utils import Vec, rand_edge_pos, rand_unit_vec
 
@@ -20,6 +20,8 @@ class World:
         self.ufo_bullets = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
         self.ufos = pg.sprite.Group()
+        self.parasites = pg.sprite.Group()
+        self.parasite_timer = uniform(C.PARASITE_TIMER_MIN, C.PARASITE_TIMER_MAX)
         self.black_hole = None
         self.bh_timer = uniform(C.BH_TIMER_MIN, C.BH_TIMER_MAX)
         self.bh_duration = 0
@@ -101,11 +103,11 @@ class World:
         self.all_sprites.add(bh)
         self.bh_duration = uniform(C.BH_DURATION_MIN, C.BH_DURATION_MAX)
 
-    # def spawn_parasite(self):
-    #     pos = rand_edge_pos()
-    #     p = Parasite(pos)
-    #     self.parasites.add(p)
-    #     self.all_sprites.add(p)
+    def spawn_parasite(self):
+        pos = rand_edge_pos()
+        p = Parasite(pos)
+        self.parasites.add(p)
+        self.all_sprites.add(p)
 
     def try_fire(self):
         if len(self.bullets) >= C.MAX_BULLETS:
@@ -147,12 +149,9 @@ class World:
                     a.frozen = False
 
         self.ship.control(keys, dt)
-        self.all_sprites.update(dt)
-
-        #update antigo dos parasitas
-        # for spr in self.all_sprites:
-        #     if not isinstance(spr, Parasite):   #atualiza tudo menos parasite
-        #         spr.update(dt)
+        for spr in self.all_sprites:
+            if not isinstance(spr, Parasite):   #atualiza tudo menos parasite
+                spr.update(dt)
         
         #spawn do buraco negro
         if self.black_hole:
@@ -190,11 +189,10 @@ class World:
                 self.ship.vel += dir_vec * force * dt * 50
 
         # spawn de parasite
-        # if not self.boss_active:
-        #     self.parasite_timer -= dt
-        #     if self.parasite_timer <= 0:
-        #         self.spawn_parasite()
-        #         self.parasite_timer = uniform(C.PARASITE_TIMER_MIN, C.PARASITE_TIMER_MAX)
+        self.parasite_timer -= dt
+        if self.parasite_timer <= 0:
+            self.spawn_parasite()
+            self.parasite_timer = uniform(C.PARASITE_TIMER_MIN, C.PARASITE_TIMER_MAX)
 
         if self.safe > 0:
             self.safe -= dt
@@ -209,10 +207,10 @@ class World:
             self.ufo_timer = C.UFO_SPAWN_EVERY
 
  
-        # for p in self.parasites:
-        #     p.update(dt, self.ship)
-        # attached_count = sum(1 for p in self.parasites if p.attached)
-        # self.ship.slow_factor = min(2.5, 1 + attached_count * 0.1)
+        for p in self.parasites:
+            p.update(dt, self.ship)
+        attached_count = sum(1 for p in self.parasites if p.attached)
+        self.ship.slow_factor = min(2.5, 1 + attached_count * 0.1)
 
         self.handle_collisions()
 
@@ -334,15 +332,15 @@ class World:
                 item.kill()
                 self.lives += 1
 
-        # parasite_hits = pg.sprite.groupcollide(
-        #     self.parasites,
-        #     self.bullets,
-        #     True,
-        #     True, 
-        #     collided=lambda p, b: (not p.attached) and (p.pos - b.pos).length() < p.r,
-        # )
-        # for p in parasite_hits:
-        #     self.score += C.PARASITE_SCORE
+        parasite_hits = pg.sprite.groupcollide(
+            self.parasites,
+            self.bullets,
+            True,
+            True, 
+            collided=lambda p, b: (not p.attached) and (p.pos - b.pos).length() < p.r,
+        )
+        for p in parasite_hits:
+            self.score += C.PARASITE_SCORE
 
         if self.ship.invuln <= 0 and self.safe <= 0 and not self.ship.shield_active:
             for ast in self.asteroids:
@@ -368,10 +366,10 @@ class World:
                     ufo.kill()
                     b.kill()
         
-        # for p in self.parasites:
-        #     if not p.attached:
-        #         if (p.pos - self.ship.pos).length() < (p.r + self.ship.r):
-        #             p.attach(self.ship)
+        for p in self.parasites:
+            if not p.attached:
+                if (p.pos - self.ship.pos).length() < (p.r + self.ship.r):
+                    p.attach(self.ship)
 
         # if self.boss and self.boss.alive():
         #     for b in list(self.bullets):

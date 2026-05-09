@@ -186,6 +186,7 @@ class Ship(pg.sprite.Sprite):
         self.shield_active = False
         self.shield_timer = 0.0      
         self.shield_cooldown = 0.0   
+        self.spread_cool = 0.0
 
     def activate_shield(self):
         if self.shield_active or self.shield_cooldown > 0:
@@ -193,12 +194,11 @@ class Ship(pg.sprite.Sprite):
         self.shield_active = True
         self.shield_timer = C.SHIELD_DURATION
         self.shield_cooldown = C.SHIELD_COOLDOWN
-        
-        self.spread_cool = 0.0
+                
 
     def control(self, keys: pg.key.ScancodeWrapper, dt: float, joystick=None):
         # Apply rotation, thrust, and friction from the current input state.
-        # slow = getattr(self, "slow_factor", 1) #efeito do parasita
+        slow = getattr(self, "slow_factor", 1) #efeito do parasita
         left = keys[pg.K_LEFT]
         right = keys[pg.K_RIGHT]
         up = keys[pg.K_UP]
@@ -222,13 +222,9 @@ class Ship(pg.sprite.Sprite):
         if right:
             self.angle += C.SHIP_TURN_SPEED * dt
         if up:
-            self.vel += angle_to_vec(self.angle) * C.SHIP_THRUST * dt
-        self.vel *= C.SHIP_FRICTION
-
-        #modificações de velocidade por causa do parasita 
-        #     self.vel += angle_to_vec(self.angle) * (C.SHIP_THRUST / slow) * dt
-        # friction = C.SHIP_FRICTION - (slow - 1) * 0.02
-        # friction = max(0.90, friction)  # evita travar demais
+            self.vel += angle_to_vec(self.angle) * (C.SHIP_THRUST / slow) * dt
+        friction = C.SHIP_FRICTION - (slow - 1) * 0.02
+        friction = max(0.90, friction)  # evita travar demais
         # self.vel *= friction    #antiga velocidade
 
     def fire(self):
@@ -402,47 +398,47 @@ class BlackHole(pg.sprite.Sprite):
         pg.draw.circle(surf, C.VIOLET, self.pos, self.visual_r - 4, 2) #anel
         pg.draw.circle(surf, C.BLACK, self.pos, self.r) #centro
 
-# class Parasite(pg.sprite.Sprite):
-#     def __init__(self, pos: Vec):
-#         super().__init__()
-#         self.pos = Vec(pos)
-#         self.vel = Vec(0, 0)
-#         self.r = C.PARASITE_RADIUS
-#         self.speed = C.PARASITE_SPEED
-#         self.attached = False
-#         self.offset = Vec(0, 0)  # posição relativa quando grudar
-#         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
+class Parasite(pg.sprite.Sprite):
+    def __init__(self, pos: Vec):
+        super().__init__()
+        self.pos = Vec(pos)
+        self.vel = Vec(0, 0)
+        self.r = C.PARASITE_RADIUS
+        self.speed = C.PARASITE_SPEED
+        self.attached = False
+        self.offset = Vec(0, 0)  # posição relativa quando grudar
+        self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
 
-#     def update(self, dt: float, ship=None):
-#         if self.attached:
-#             self.pos = ship.pos + self.offset
-#         else:
-#             dir_vec = ship.pos - self.pos
-#             if dir_vec.length() > 1:
-#                 dir_vec = dir_vec.normalize()
-#                 self.vel = dir_vec * self.speed
+    def update(self, dt: float, ship=None):
+        if self.attached:
+            self.pos = ship.pos + self.offset
+        else:
+            dir_vec = ship.pos - self.pos
+            if dir_vec.length() > 1:
+                dir_vec = dir_vec.normalize()
+                self.vel = dir_vec * self.speed
 
-#             self.pos += self.vel * dt
+            self.pos += self.vel * dt
 
-#         if not self.attached:
-#             self.pos = wrap_pos(self.pos)
-#         self.rect.center = self.pos
+        if not self.attached:
+            self.pos = wrap_pos(self.pos)
+        self.rect.center = self.pos
 
-#     def attach(self, ship):
-#         self.attached = True
-#         self.offset = self.pos - ship.pos
+    def attach(self, ship):
+        self.attached = True
+        self.offset = self.pos - ship.pos
 
-#     def draw(self, surf: pg.Surface):
-#         color = C.GREEN if not self.attached else C.DARKER_GREEN
-#         pts = []
-#         for i in range(8):
-#             ang = i * (360 / 8)
-#             jitter = uniform(0.7, 1.3)
-#             r = self.r * jitter
-#             v = Vec(math.cos(math.radians(ang)), math.sin(math.radians(ang)))
-#             pts.append(self.pos + v * r)
+    def draw(self, surf: pg.Surface):
+        color = C.GREEN if not self.attached else C.DARKER_GREEN
+        pts = []
+        for i in range(8):
+            ang = i * (360 / 8)
+            jitter = uniform(0.7, 1.3)
+            r = self.r * jitter
+            v = Vec(math.cos(math.radians(ang)), math.sin(math.radians(ang)))
+            pts.append(self.pos + v * r)
 
-#         pg.draw.polygon(surf, color, pts)
+        pg.draw.polygon(surf, color, pts)
 
 
 class BossBullet(pg.sprite.Sprite):

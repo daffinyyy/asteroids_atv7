@@ -60,6 +60,7 @@ class Game:
                         else:
                             pg.quit()
                             sys.exit(0)
+
                     elif self.scene.name == "play":
                         if e.key == pg.K_SPACE:
                             self.world.try_fire()
@@ -72,29 +73,42 @@ class Game:
                         if e.key == pg.K_RSHIFT:
                             self.world.try_spread()
 
-                #joystick controllers
-                if e.type == pg.JOYBUTTONDOWN:
-                    if e.button == C.JOYSTICK_FIRE:
-                        self.world.try_fire()
-                    elif e.button == C.JOYSTICK_SHIELD:
-                        self.world.try_shield()
-                    elif e.button == C.JOYSTICK_HYPERSPACE:
-                        self.world.hyperspace()
-                    elif e.button == C.JOYSTICK_SPREAD:
-                        self.world.try_spread()
-                    elif e.button == C.JOYSTICK_EXIT:
-                        pg.quit()
-                        sys.exit(0)
-      
-      
                     elif self.scene.name == "menu":
                         self.world = World()
                         self.scene = Scene("play")
+
                     elif self.scene.name == "game_over":
                         if e.key in (pg.K_RETURN, pg.K_SPACE):
                             self.world = World()
                             self.go_fade = 0.0
                             self.scene = Scene("play")
+
+                #joystick controllers
+                if e.type == pg.JOYBUTTONDOWN:
+                    if self.scene.name == "play":
+                        if e.button == C.JOYSTICK_FIRE:
+                            self.world.try_fire()
+                        elif e.button == C.JOYSTICK_SHIELD:
+                            self.world.try_shield()
+                        elif e.button == C.JOYSTICK_HYPERSPACE:
+                            self.world.hyperspace()
+                        elif e.button == C.JOYSTICK_SPREAD:
+                            self.world.try_spread()
+                        elif e.button == C.JOYSTICK_EXIT:
+                            pg.quit()
+                            sys.exit(0)
+                    
+                    if self.scene.name == "menu":
+                        self.world = World()
+                        self.scene = Scene("play")
+
+                    elif self.scene.name == "game_over":
+                        self.world = World()
+                        self.go_fade = 0.0
+                        self.scene = Scene("play")
+      
+      
+                    
 
             keys = pg.key.get_pressed()
             self.screen.fill(C.BLACK)
