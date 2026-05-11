@@ -205,16 +205,14 @@ class Ship(pg.sprite.Sprite):
 
         #joystick controls
         if joystick:
-            axis_y = joystick.get_axis(C.JOYSTICK_AXIS_Y)
-            LT = joystick.get_axis(C.JOYSTICK_LEFT)
-            RT = joystick.get_axis(C.JOYSTICK_RIGHT)
-
-            if axis_y < -(C.JOYSTICK_ANALOG_DRIFT):
-                up = True
-            if LT > C.JOYSTICK_ANALOG_DRIFT:
+            axis_x = joystick.get_axis(C.JOYSTICK_LEFT_RIGHT)
+            
+            if axis_x < -(C.JOYSTICK_ANALOG_DRIFT):
                 left = True
-            if RT > C.JOYSTICK_ANALOG_DRIFT:
+            if axis_x > C.JOYSTICK_ANALOG_DRIFT:
                 right = True
+            if joystick.get_button(C.JOYSTICK_UP):
+                up = True
 
         #rotação
         if left:

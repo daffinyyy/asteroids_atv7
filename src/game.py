@@ -24,11 +24,11 @@ class Game:
 
         #play with joystick
         pg.joystick.init()
-        joystick = None
+        self.joystick = None
         if pg.joystick.get_count() > 0:
-            joystick = pg.joystick.Joystick(0)
-            joystick.init()
-            print(f"Controle conectado: {joystick.get_name()}")
+            self.joystick = pg.joystick.Joystick(0)
+            self.joystick.init()
+            print(f"Controle conectado: {self.joystick.get_name()}")
 
         if C.RANDOM_SEED is not None:
             random.seed(C.RANDOM_SEED)
@@ -74,27 +74,35 @@ class Game:
 
                 #joystick controllers
                 if e.type == pg.JOYBUTTONDOWN:
-                    if e.button == C.JOYSTICK_FIRE:
-                        self.world.try_fire()
-                    elif e.button == C.JOYSTICK_SHIELD:
-                        self.world.try_shield()
-                    elif e.button == C.JOYSTICK_HYPERSPACE:
-                        self.world.hyperspace()
-                    elif e.button == C.JOYSTICK_SPREAD:
-                        self.world.try_spread()
-                    elif e.button == C.JOYSTICK_EXIT:
-                        pg.quit()
-                        sys.exit(0)
-      
-      
-                    elif self.scene.name == "menu":
+                    if self.scene.name == "play":
+                        if e.button == C.JOYSTICK_SHIELD:
+                            self.world.try_shield()
+                        elif e.button == C.JOYSTICK_HYPERSPACE:
+                            self.world.hyperspace()
+                        elif e.button == C.JOYSTICK_EXIT:
+                            pg.quit()
+                            sys.exit(0)
+
+                if e.type == pg.JOYAXISMOTION:
+                    if self.scene.name == "play":
+                        if e.axis == C.JOYSTICK_FIRE:
+                            if e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_fire()
+                        elif e.axis == C.JOYSTICK_SPREAD:
+                            if e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_spread()
+                    
+                    if self.scene.name == "menu":
                         self.world = World()
                         self.scene = Scene("play")
+
                     elif self.scene.name == "game_over":
-                        if e.key in (pg.K_RETURN, pg.K_SPACE):
-                            self.world = World()
-                            self.go_fade = 0.0
-                            self.scene = Scene("play")
+                        self.world = World()
+                        self.go_fade = 0.0
+                        self.scene = Scene("play")
+      
+      
+                    
 
             keys = pg.key.get_pressed()
             self.screen.fill(C.BLACK)
@@ -102,7 +110,7 @@ class Game:
             if self.scene.name == "menu":
                 self.draw_menu()
             elif self.scene.name == "play":
-                self.world.update(dt, keys)
+                self.world.update(dt, keys, self.joystick)
                 self.world.draw(self.screen, self.font)
                 # Verifica se o mundo sinalizou fim de jogo
                 if self.world.game_over:

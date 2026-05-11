@@ -137,7 +137,7 @@ class World:
     #     self.ship.dash()
 
 
-    def update(self, dt: float, keys):
+    def update(self, dt: float, keys, joystick=None):
         # Update the world simulation, timers, enemy behavior, and progression.
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
