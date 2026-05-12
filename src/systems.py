@@ -8,7 +8,7 @@ import pygame as pg
 
 import config as C
 from sprites import (
-    Asteroid, PowerAsteroid, Ship, UFO, BlackHole, Parasite, ClockItem, LifeItem
+    Asteroid, BossBullet, PowerAsteroid, Ship, UFO, BlackHole, ClockItem, LifeItem, RapidFireItem
 )
 from utils import Vec, rand_edge_pos, rand_unit_vec
 
@@ -50,6 +50,7 @@ class World:
         self.spread_boss_timer = C.SPREAD_BOSS_INTERVAL
         self.clock_items = pg.sprite.Group()
         self.life_items = pg.sprite.Group()
+        self.rapid_fire_items = pg.sprite.Group()
         self.freeze_timer = 0.0
 
     def start_wave(self):
@@ -339,11 +340,35 @@ class World:
                     for a in self.asteroids:
                         a.frozen = True
 
-        for parasite in self.parasites:
-            if not parasite.attached:
-                for ship in self.ships:
-                    if (parasite.pos - ship.pos).length() < (parasite.r + ship.r):
-                        parasite.attach(ship)
+        # Rapid fire items
+        for item in list(self.rapid_fire_items):
+            for ship in self.ships:
+                if (item.pos - ship.pos).length() < (item.r + ship.r):
+                    item.kill()
+                    ship.rapid_fire_timer = C.RAPID_FIRE_DURATION
+                    break
+
+        # Ship collisions with asteroids and UFOs
+        for ship in self.ships:
+            safe_timer = self.safe if ship == self.ship1 else self.safe2
+            if ship.invuln <= 0 and safe_timer <= 0 and not ship.shield_active:
+                # Check asteroid collision
+                for ast in self.asteroids:
+                    if (ast.pos - ship.pos).length() < (ast.r + ship.r):
+                        self.ship_die(ship)
+                        break
+                
+                # Check UFO collision
+                for ufo in self.ufos:
+                    if (ufo.pos - ship.pos).length() < (ufo.r + ship.r):
+                        self.ship_die(ship)
+                        break
+                
+                # Check UFO bullet collision
+                for bullet in self.ufo_bullets:
+                    if (bullet.pos - ship.pos).length() < (bullet.r + ship.r):
+                        bullet.kill()
+                        self.ship_die(ship)
                         break
 
         for ufo in list(self.ufos):
@@ -371,6 +396,11 @@ class World:
         if not isinstance(ast, PowerAsteroid) and uniform(0, 1) < C.FREEZE_ITEM_CHANCE:
             item = ClockItem(pos)
             self.clock_items.add(item)
+            self.all_sprites.add(item)
+
+        if not isinstance(ast, PowerAsteroid) and uniform(0, 1) < C.RAPID_FIRE_CHANCE:
+            item = RapidFireItem(pos)
+            self.rapid_fire_items.add(item)
             self.all_sprites.add(item)
 
         ast.kill()
@@ -428,6 +458,11 @@ class World:
             sh = font.render("P1 SHIELD OK", True, C.SHIELD_COLOR)
             surf.blit(sh, (C.WIDTH - 230, 30))
 
+        # Player 1 rapid fire
+        if self.ship1.rapid_fire_timer > 0:
+            rf = font.render(f"P1 RAPID {self.ship1.rapid_fire_timer:.1f}s", True, C.RAPID_FIRE_COLOR)
+            surf.blit(rf, (C.WIDTH - 230, 50))
+
         # Player 2 status
         if self.ship2:
             if self.ship2.spread_cool > 0:
@@ -445,6 +480,11 @@ class World:
             else:
                 sh2 = font.render("P2 SHIELD OK", True, C.SHIELD_COLOR)
                 surf.blit(sh2, (10, 50))
+
+            # Player 2 rapid fire
+            if self.ship2.rapid_fire_timer > 0:
+                rf2 = font.render(f"P2 RAPID {self.ship2.rapid_fire_timer:.1f}s", True, C.RAPID_FIRE_COLOR)
+                surf.blit(rf2, (10, 70))
 
         if self.freeze_timer > 0:
             fl = font.render(f"FREEZE: {self.freeze_timer:.1f}s", True, C.ICY_BLUE)

@@ -131,3 +131,11 @@ JOYSTICK_SHIELD = 1 #botao B
 JOYSTICK_HYPERSPACE = 2 #botao X
 JOYSTICK_SPREAD = 4 #LT
 JOYSTICK_EXIT = 7 #+
+
+# Power-up de tiro rápido
+RAPID_FIRE_DURATION = 7.0
+RAPID_FIRE_COOLDOWN = 0.06        # Fire rate durante o power-up (era 0.2)
+RAPID_FIRE_ITEM_RADIUS = 10
+RAPID_FIRE_ITEM_TTL = 12.0
+RAPID_FIRE_COLOR = (255, 220, 50)  # Amarelo dourado
+RAPID_FIRE_CHANCE = 0.12           # Chance de dropar ao quebrar asteroide
