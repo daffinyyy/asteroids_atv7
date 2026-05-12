@@ -403,6 +403,7 @@ class Parasite(pg.sprite.Sprite):
         self.r = C.PARASITE_RADIUS
         self.speed = C.PARASITE_SPEED
         self.attached = False
+        self.host = None
         self.offset = Vec(0, 0)  # posição relativa quando grudar
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
 
@@ -423,6 +424,7 @@ class Parasite(pg.sprite.Sprite):
 
     def attach(self, ship):
         self.attached = True
+        self.host = ship
         self.offset = self.pos - ship.pos
 
     def draw(self, surf: pg.Surface):

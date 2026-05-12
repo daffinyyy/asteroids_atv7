@@ -8,7 +8,7 @@ import pygame as pg
 
 import config as C
 from sprites import (
-    Asteroid, BossBullet, PowerAsteroid, Ship, UFO, BlackHole, ClockItem, LifeItem, RapidFireItem
+    Asteroid, BossBullet, PowerAsteroid, Ship, UFO, BlackHole, ClockItem, LifeItem, RapidFireItem, Parasite
 )
 from utils import Vec, rand_edge_pos, rand_unit_vec
 
@@ -378,6 +378,27 @@ class World:
                     self.score += score
                     ufo.kill()
                     b.kill()
+
+        # Parasite collision with ships (attach)
+        for parasite in self.parasites:
+            if not parasite.attached:
+                for ship in self.ships:
+                    if (parasite.pos - ship.pos).length() < (parasite.r + ship.r):
+                        parasite.attach(ship)
+                        parasite.host = ship
+                        break
+
+        # Bullets hit unattached parasites
+        parasite_hits = pg.sprite.groupcollide(
+            self.parasites,
+            self.bullets,
+            False,
+            True,
+            collided=lambda p, b: (not p.attached) and (p.pos - b.pos).length() < p.r,
+        )
+        for p in parasite_hits:
+            self.score += C.PARASITE_SCORE
+            p.kill()
 
         # Black hole collision
         if self.black_hole:
