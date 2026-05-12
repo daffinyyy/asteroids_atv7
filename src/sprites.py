@@ -194,7 +194,7 @@ class Ship(pg.sprite.Sprite):
         self.shield_active = True
         self.shield_timer = C.SHIELD_DURATION
         self.shield_cooldown = C.SHIELD_COOLDOWN
-                
+        self.spread_cool = 0.0
 
     def control(self, keys: pg.key.ScancodeWrapper, dt: float, joystick=None):
         # Apply rotation, thrust, and friction from the current input state.
@@ -225,7 +225,7 @@ class Ship(pg.sprite.Sprite):
             self.vel += angle_to_vec(self.angle) * (C.SHIP_THRUST / slow) * dt
         friction = C.SHIP_FRICTION - (slow - 1) * 0.02
         friction = max(0.90, friction)  # evita travar demais
-        # self.vel *= friction    #antiga velocidade
+        self.vel *= friction
 
     def fire(self):
         if self.cool > 0:

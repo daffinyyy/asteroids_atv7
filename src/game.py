@@ -22,13 +22,45 @@ class Game:
     def __init__(self):
         pg.init()
 
-        #play with joystick
+        # Joysticks: P1 usa o primeiro, P2 usa o segundo (se existir).
         pg.joystick.init()
-        joystick = None
+        self.joystick = None
+        self.joystick2 = None
+        self.joystick_id = None
+        self.joystick2_id = None
+        self.joystick_index = None
+        self.joystick2_index = None
+        self.keyboard_player = 1
         if pg.joystick.get_count() > 0:
-            joystick = pg.joystick.Joystick(0)
-            joystick.init()
-            print(f"Controle conectado: {joystick.get_name()}")
+            self.joystick = pg.joystick.Joystick(0)
+            self.joystick.init()
+            self.joystick_id = self.joystick.get_instance_id()
+            self.joystick_index = self.joystick.get_id()
+            print(f"Controle P1 conectado: {self.joystick.get_name()}")
+        if C.MULTIPLAYER_ENABLED and pg.joystick.get_count() > 1:
+            self.joystick2 = pg.joystick.Joystick(1)
+            self.joystick2.init()
+            self.joystick2_id = self.joystick2.get_instance_id()
+            self.joystick2_index = self.joystick2.get_id()
+            print(f"Controle P2 conectado: {self.joystick2.get_name()}")
+
+        # Modos aceitos no multiplayer:
+        # 1) 1 teclado + 1 controle
+        # 2) 2 controles
+        if C.MULTIPLAYER_ENABLED:
+            joy_count = pg.joystick.get_count()
+            if joy_count >= 2:
+                self.keyboard_player = 0
+            elif joy_count == 1:
+                self.keyboard_player = 1
+                self.joystick2 = self.joystick
+                self.joystick2_id = self.joystick_id
+                self.joystick2_index = self.joystick_index
+                self.joystick = None
+                self.joystick_id = None
+                self.joystick_index = None
+            else:
+                self.keyboard_player = 1
 
         if C.RANDOM_SEED is not None:
             random.seed(C.RANDOM_SEED)
@@ -61,44 +93,7 @@ class Game:
                             pg.quit()
                             sys.exit(0)
 
-                    elif self.scene.name == "play":
-                        if e.key == pg.K_SPACE:
-                            self.world.try_fire()
-                        if e.key == pg.K_LSHIFT:
-                            self.world.hyperspace()
-                        if e.key == pg.K_s:
-                            self.world.try_shield()
-                        # if e.key == pg.K_RSHIFT:
-                        #     self.world.try_dash()
-                        if e.key == pg.K_RSHIFT:
-                            self.world.try_spread()
-
                     elif self.scene.name == "menu":
-                        self.world = World()
-                        self.scene = Scene("play")
-
-                    elif self.scene.name == "game_over":
-                        if e.key in (pg.K_RETURN, pg.K_SPACE):
-                            self.world = World()
-                            self.go_fade = 0.0
-                            self.scene = Scene("play")
-
-                #joystick controllers
-                if e.type == pg.JOYBUTTONDOWN:
-                    if self.scene.name == "play":
-                        if e.button == C.JOYSTICK_FIRE:
-                            self.world.try_fire()
-                        elif e.button == C.JOYSTICK_SHIELD:
-                            self.world.try_shield()
-                        elif e.button == C.JOYSTICK_HYPERSPACE:
-                            self.world.hyperspace()
-                        elif e.button == C.JOYSTICK_SPREAD:
-                            self.world.try_spread()
-                        elif e.button == C.JOYSTICK_EXIT:
-                            pg.quit()
-                            sys.exit(0)
-                    
-                    if self.scene.name == "menu":
                         self.world = World()
                         self.scene = Scene("play")
 
@@ -106,9 +101,57 @@ class Game:
                         self.world = World()
                         self.go_fade = 0.0
                         self.scene = Scene("play")
-      
-      
-                    
+
+                    elif self.scene.name == "play" and self.keyboard_player == 1:
+                        # Apenas um jogador no teclado (P1)
+                        if e.key == pg.K_SPACE:
+                            self.world.try_fire()
+                        if e.key == pg.K_LSHIFT:
+                            self.world.hyperspace()
+                        if e.key == pg.K_s:
+                            self.world.try_shield()
+                        if e.key == pg.K_RSHIFT:
+                            self.world.try_spread()
+
+                #joystick controllers
+                if e.type == pg.JOYBUTTONDOWN:
+                    if self.scene.name == "play":
+                        event_joy = getattr(
+                            e,
+                            "instance_id",
+                            getattr(e, "joy", getattr(e, "device", None)),
+                        )
+                        if self.joystick_id is not None and event_joy in (self.joystick_id, self.joystick_index):
+                            if e.button == C.JOYSTICK_SHIELD:
+                                self.world.try_shield()
+                            elif e.button == C.JOYSTICK_HYPERSPACE:
+                                self.world.hyperspace()
+                            elif e.button == C.JOYSTICK_EXIT:
+                                pg.quit()
+                                sys.exit(0)
+                        elif self.joystick2_id is not None and event_joy in (self.joystick2_id, self.joystick2_index):
+                            if e.button == C.JOYSTICK_SHIELD:
+                                self.world.try_shield_p2()
+                            elif e.button == C.JOYSTICK_HYPERSPACE:
+                                self.world.hyperspace_p2()
+
+                if e.type == pg.JOYAXISMOTION:
+                    if self.scene.name == "play":
+                        event_joy = getattr(
+                            e,
+                            "instance_id",
+                            getattr(e, "joy", getattr(e, "device", None)),
+                        )
+                        if self.joystick_id is not None and event_joy in (self.joystick_id, self.joystick_index):
+                            if e.axis == C.JOYSTICK_FIRE and e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_fire()
+                            elif e.axis == C.JOYSTICK_SPREAD and e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_spread()
+                        elif self.joystick2_id is not None and event_joy in (self.joystick2_id, self.joystick2_index):
+                            if e.axis == C.JOYSTICK_FIRE and e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_fire_p2()
+                            elif e.axis == C.JOYSTICK_SPREAD and e.value > C.JOYSTICK_ANALOG_DRIFT:
+                                self.world.try_spread_p2()
 
             keys = pg.key.get_pressed()
             self.screen.fill(C.BLACK)
@@ -116,7 +159,8 @@ class Game:
             if self.scene.name == "menu":
                 self.draw_menu()
             elif self.scene.name == "play":
-                self.world.update(dt, keys)
+                keys_p1 = keys if self.keyboard_player == 1 else None
+                self.world.update(dt, keys_p1, self.joystick, None, self.joystick2)
                 self.world.draw(self.screen, self.font)
                 # Verifica se o mundo sinalizou fim de jogo
                 if self.world.game_over:
@@ -153,14 +197,32 @@ class Game:
              C.WIDTH // 2 - 90, C.HEIGHT // 2 + 80)
 
     def draw_menu(self):
-        
-        text(self.screen, self.big, "ASTEROIDS",
-             C.WIDTH // 2 - 150, 180)
-        text(self.screen, self.font,
-             "Setas: virar/acelerar  Espaco: tiro  LShift: hiper  S: shield",
-             120, 300)
-        text(self.screen, self.font,
-             "RShift: tiro espalhado (15s cooldown)",
-             230, 330)
-        text(self.screen, self.font,
-             "Pressione qualquer tecla...", 260, 390)
+           text(self.screen, self.big, "ASTEROIDS",
+               C.WIDTH // 2 - 150, 120)
+           if C.MULTIPLAYER_ENABLED:
+              text(self.screen, self.font,
+                  "P1 TECLADO: Setas  Space tiro  LShift hiper  S shield  RShift spread",
+                  50, 270)
+              text(self.screen, self.font,
+                  "CONTROLE: Analogico virar  A acelerar  RT tiro  LT spread  B shield  X hiper",
+                  50, 310)
+              if self.keyboard_player == 0:
+                 mode_txt = "Modo atual: 2 controles"
+              elif self.joystick2 is not None:
+                 mode_txt = "Modo atual: teclado + 1 controle"
+              else:
+                 mode_txt = "Modo atual: apenas teclado (conecte controle para P2)"
+              text(self.screen, self.font,
+                  mode_txt,
+                  260, 360)
+              text(self.screen, self.font,
+                  "Pressione qualquer tecla para iniciar", 240, 420)
+           else:
+              text(self.screen, self.font,
+                  "Setas: virar/acelerar  Espaco: tiro  LShift: hiper  S: shield",
+                  120, 300)
+              text(self.screen, self.font,
+                  "RShift: tiro espalhado (15s cooldown)",
+                  230, 330)
+              text(self.screen, self.font,
+                  "Pressione qualquer tecla...", 260, 390)
