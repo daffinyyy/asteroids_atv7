@@ -95,6 +95,11 @@ class Game:
                         else:
                             pg.quit()
                             sys.exit(0)
+
+                    elif self.scene.name == "menu":
+                        self.world = World()
+                        self.scene = Scene("play")
+
                     elif self.scene.name == "menu":
                         self.world = World()
                         self.scene = Scene("play")
@@ -152,9 +157,6 @@ class Game:
                                 self.world.try_fire_p2()
                             elif e.axis == C.JOYSTICK_SPREAD and e.value > C.JOYSTICK_ANALOG_DRIFT:
                                 self.world.try_spread_p2()
-      
-      
-                    
 
             keys = pg.key.get_pressed()
             self.screen.fill(C.BLACK)

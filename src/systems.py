@@ -31,6 +31,8 @@ class World:
         self.ufo_bullets = pg.sprite.Group()
         self.asteroids = pg.sprite.Group()
         self.ufos = pg.sprite.Group()
+        self.parasites = pg.sprite.Group()
+        self.parasite_timer = uniform(C.PARASITE_TIMER_MIN, C.PARASITE_TIMER_MAX)
         self.black_hole = None
         self.bh_timer = uniform(C.BH_TIMER_MIN, C.BH_TIMER_MAX)
         self.bh_duration = 0
@@ -119,6 +121,15 @@ class World:
         self.all_sprites.add(bh)
         self.bh_duration = uniform(C.BH_DURATION_MIN, C.BH_DURATION_MAX)
 
+    def spawn_parasite(self):
+        pos = rand_edge_pos()
+        for ship in self.ships:
+            while (pos - ship.pos).length() < 150:
+                pos = rand_edge_pos()
+        p = Parasite(pos)
+        self.parasites.add(p)
+        self.all_sprites.add(p)
+
     def try_fire(self):
         if len(self.bullets) >= C.MAX_BULLETS:
             return
@@ -182,12 +193,29 @@ class World:
                 for a in self.asteroids:
                     a.frozen = False
 
-        # Control both ships
         self.ship1.control(keys, dt, joystick if joystick else None)
         if self.ship2:
             self._control_p2(keys_p2, dt, joystick2 if joystick2 else None)
-        
-        self.all_sprites.update(dt)
+
+        for spr in self.all_sprites:
+            if not isinstance(spr, Parasite):
+                spr.update(dt)
+
+        for parasite in self.parasites:
+            if parasite.attached and parasite.host is not None:
+                target_ship = parasite.host
+            else:
+                target_ship = min(self.ships, key=lambda ship: (parasite.pos - ship.pos).length())
+            parasite.update(dt, target_ship)
+
+        for ship in self.ships:
+            attached_count = sum(1 for parasite in self.parasites if parasite.attached and parasite.host is ship)
+            ship.slow_factor = min(2.5, 1 + attached_count * 0.1)
+
+        self.parasite_timer -= dt
+        if self.parasite_timer <= 0:
+            self.spawn_parasite()
+            self.parasite_timer = uniform(C.PARASITE_TIMER_MIN, C.PARASITE_TIMER_MAX)
 
         # Black hole update
         if self.black_hole:
@@ -311,15 +339,6 @@ class World:
                     self.freeze_timer = C.FREEZE_DURATION
                     for a in self.asteroids:
                         a.frozen = True
-                    break
-
-        # Life items
-        for item in list(self.life_items):
-            for ship in self.ships:
-                if (item.pos - ship.pos).length() < (item.r + ship.r):
-                    item.kill()
-                    self.lives += 1
-                    break
 
         # Rapid fire items
         for item in list(self.rapid_fire_items):
@@ -352,7 +371,6 @@ class World:
                         self.ship_die(ship)
                         break
 
-        # UFO vs bullets
         for ufo in list(self.ufos):
             for b in list(self.bullets):
                 if (ufo.pos - b.pos).length() < (ufo.r + b.r):
