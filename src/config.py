@@ -1,3 +1,26 @@
+
+# MULTIPLAYER CONFIGURATION
+MULTIPLAYER_ENABLED = True
+PLAYER1_COLOR = (0, 255, 100)      # Verde
+PLAYER2_COLOR = (255, 100, 200)    # Rosa/Magenta
+
+# Player 1 Keyboard Controls (Setas)
+# P1_UP, P1_DOWN, P1_LEFT, P1_RIGHT já são as setas
+# P1_FIRE = SPACE, P1_SHIELD = S, P1_HYPERSPACE = LSHIFT, P1_SPREAD = RSHIFT (já configurado)
+
+# Player 2 Keyboard Controls (WASD)
+P2_UP = 119          # W
+P2_DOWN = 115        # S
+P2_LEFT = 97         # A
+P2_RIGHT = 100       # D
+P2_FIRE = 120        # X
+P2_SHIELD = 99       # C
+P2_HYPERSPACE = 122  # Z
+P2_SPREAD = 118      # V
+
+# Joystick Configuration
+JOYSTICK_PLAYER1 = 0  # First joystick for P1
+JOYSTICK_PLAYER2 = 1  # Second joystick for P2
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file stores the gameplay, rendering, and balancing constants.
 
