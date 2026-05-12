@@ -9,7 +9,6 @@ import pygame as pg
 import config as C
 from utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
 
-
 class Bullet(pg.sprite.Sprite):
     def __init__(self, pos: Vec, vel: Vec):
         super().__init__()
@@ -180,15 +179,12 @@ class Ship(pg.sprite.Sprite):
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
         self.player_id = player_id
         self.color = C.PLAYER1_COLOR if player_id == 1 else C.PLAYER2_COLOR
-        # self.is_dashing = False
-        # self.dash_timer = 0.0
-        # self.cooldown_timer = 0.0
-        # self._pre_dash_vel = None
         self.has_spread_shot = False
         self.spread_cool = 0.0
         self.shield_active = False
         self.shield_timer = 0.0
         self.shield_cooldown = 0.0
+        self.rapid_fire_timer = 0.0
 
     def activate_shield(self):
         if self.shield_active or self.shield_cooldown > 0:
@@ -240,7 +236,9 @@ class Ship(pg.sprite.Sprite):
     def fire(self):
         if self.cool > 0:
             return None
-        self.cool = C.SHIP_FIRE_RATE
+        
+        fire_rate = C.RAPID_FIRE_COOLDOWN if self.rapid_fire_timer > 0 else C.SHIP_FIRE_RATE
+        self.cool = fire_rate
 
         dirv = angle_to_vec(self.angle)
         pos = self.pos + dirv * (self.r + 6)
@@ -301,18 +299,12 @@ class Ship(pg.sprite.Sprite):
             self.spread_cool -= dt
             if self.spread_cool < 0:
                 self.spread_cool = 0
-                
-        # if self.cooldown_timer > 0:
-        #     self.cooldown_timer -= dt
-        #     if self.cooldown_timer < 0:
-        #         self.cooldown_timer = 0.0
-        # if self.is_dashing:
-        #     self.dash_timer -= dt
-        #     if self.dash_timer <= 0:
-        #         self.dash_timer = 0.0
-        #         self.is_dashing = False
-        #         self.vel = Vec(self._pre_dash_vel)
-        #         self._pre_dash_vel = None
+
+        if self.rapid_fire_timer > 0:
+            self.rapid_fire_timer -= dt
+            if self.rapid_fire_timer < 0:
+                self.rapid_fire_timer = 0.0
+
         self.pos += self.vel * dt
         self.pos = wrap_pos(self.pos)
         self.rect.center = self.pos
@@ -471,3 +463,34 @@ class BossBullet(pg.sprite.Sprite):
 
     def draw(self, surf: pg.Surface):
         pg.draw.circle(surf, C.BOSS_BULLET_COLOR, self.pos, self.r)
+
+class RapidFireItem(pg.sprite.Sprite):
+    def __init__(self, pos: Vec):
+        super().__init__()
+        self.pos = Vec(pos)
+        self.r = C.RAPID_FIRE_ITEM_RADIUS
+        self.ttl = C.RAPID_FIRE_ITEM_TTL
+        self._pulse = 0.0  # Para animação de pulso
+
+    def update(self, dt: float):
+        self.ttl -= dt
+        self._pulse += dt * 6
+        if self.ttl <= 0:
+            self.kill()
+
+    def draw(self, surf: pg.Surface):
+        # Pisca quando está prestes a sumir (últimos 3s)
+        if self.ttl < 3.0 and int(self.ttl * 6) % 2 == 0:
+            return
+
+        # Círculo externo pulsante
+        pulse_r = int(self.r + 3 * abs(math.sin(self._pulse)))
+        pg.draw.circle(surf, C.RAPID_FIRE_COLOR,
+                       (int(self.pos.x), int(self.pos.y)), pulse_r, 2)
+
+        # Símbolo: dois traços verticais (ícone de "tiro rápido")
+        cx, cy = int(self.pos.x), int(self.pos.y)
+        pg.draw.line(surf, C.RAPID_FIRE_COLOR,
+                     (cx - 3, cy - 5), (cx - 3, cy + 5), 2)
+        pg.draw.line(surf, C.RAPID_FIRE_COLOR,
+                     (cx + 3, cy - 5), (cx + 3, cy + 5), 2)
