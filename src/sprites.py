@@ -168,7 +168,7 @@ class LifeItem(pg.sprite.Sprite):
 
 
 class Ship(pg.sprite.Sprite):
-    def __init__(self, pos: Vec):
+    def __init__(self, pos: Vec, player_id: int = 1):
         super().__init__()
         self.pos = Vec(pos)
         self.vel = Vec(0, 0)
@@ -178,14 +178,17 @@ class Ship(pg.sprite.Sprite):
         self.alive = True
         self.r = C.SHIP_RADIUS
         self.rect = pg.Rect(0, 0, self.r * 2, self.r * 2)
+        self.player_id = player_id
+        self.color = C.PLAYER1_COLOR if player_id == 1 else C.PLAYER2_COLOR
         # self.is_dashing = False
         # self.dash_timer = 0.0
         # self.cooldown_timer = 0.0
         # self._pre_dash_vel = None
         self.has_spread_shot = False
+        self.spread_cool = 0.0
         self.shield_active = False
-        self.shield_timer = 0.0      
-        self.shield_cooldown = 0.0   
+        self.shield_timer = 0.0
+        self.shield_cooldown = 0.0
 
     def activate_shield(self):
         if self.shield_active or self.shield_cooldown > 0:
@@ -196,12 +199,17 @@ class Ship(pg.sprite.Sprite):
         
         self.spread_cool = 0.0
 
-    def control(self, keys: pg.key.ScancodeWrapper, dt: float, joystick=None):
+    def control(self, keys: pg.key.ScancodeWrapper | None, dt: float, joystick=None):
         # Apply rotation, thrust, and friction from the current input state.
         # slow = getattr(self, "slow_factor", 1) #efeito do parasita
-        left = keys[pg.K_LEFT]
-        right = keys[pg.K_RIGHT]
-        up = keys[pg.K_UP]
+        left = False
+        right = False
+        up = False
+
+        if keys is not None:
+            left = keys[pg.K_LEFT]
+            right = keys[pg.K_RIGHT]
+            up = keys[pg.K_UP]
 
         #joystick controls
         if joystick:
@@ -316,7 +324,7 @@ class Ship(pg.sprite.Sprite):
         p1 = self.pos + dirv * self.r
         p2 = self.pos + left * self.r * 0.9
         p3 = self.pos + right * self.r * 0.9
-        draw_poly(surf, [p1, p2, p3])
+        pg.draw.polygon(surf, self.color, [p1, p2, p3], width=1)
         # if self.is_dashing:
         #     draw_circle(surf, self.pos, self.r + 6)
         # elif self.invuln > 0 and int(self.invuln * 10) % 2 == 0:

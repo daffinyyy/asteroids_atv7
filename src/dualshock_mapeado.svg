@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-label="Controle estilo DualShock com mapeamento do jogo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </linearGradient>
+
+    <radialGradient id="shellTop" cx="50%" cy="25%" r="80%">
+      <stop offset="0%" stop-color="#31415b"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </radialGradient>
+
+    <radialGradient id="shellBottom" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1d293d"/>
+      <stop offset="100%" stop-color="#0b1220"/>
+    </radialGradient>
+
+    <linearGradient id="touchPad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2b3446"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <radialGradient id="stick" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </radialGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+
+    <style>
+      .line { stroke:#94a3b8; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+      .symbol { font-family: Arial, sans-serif; font-weight: 700; font-size: 22px; text-anchor: middle; dominant-baseline: middle; }
+      .legend-title { font-family: Arial, sans-serif; font-size: 28px; font-weight: 700; fill: #e2e8f0; }
+      .legend-text { font-family: Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #cbd5e1; }
+      .note { font-family: Arial, sans-serif; font-size: 18px; fill: #94a3b8; }
+      .callout { stroke: #60a5fa; stroke-width: 2.5; fill: none; }
+      .callout-text { font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; fill: #e2e8f0; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="820" fill="url(#bg)"/>
+
+  <text x="700" y="64" text-anchor="middle" class="legend-title">DualShock - Mapeamento do Asteroids</text>
+  <text x="700" y="95" text-anchor="middle" class="note">P1 usa controle 0 | P2 usa controle 1 (mesmo layout de botoes)</text>
+
+  <ellipse cx="700" cy="700" rx="360" ry="38" fill="#000" opacity="0.32"/>
+
+  <g filter="url(#shadow)">
+    <path fill="url(#shellBottom)" d="M374,430 C346,550 412,626 496,634 C578,642 625,596 642,548 C648,530 660,520 700,520 C740,520 752,530 758,548 C775,596 822,642 904,634 C988,626 1054,550 1026,430 C1002,326 940,292 860,294 C804,296 768,326 700,326 C632,326 596,296 540,294 C460,292 398,326 374,430 Z"/>
+    <path fill="url(#shellTop)" d="M386,426 C410,346 464,316 538,318 C586,320 624,352 700,352 C776,352 814,320 862,318 C936,316 990,346 1014,426 C1026,466 1004,494 970,496 C930,498 892,472 872,436 C860,416 842,404 700,404 C558,404 540,416 528,436 C508,472 470,498 430,496 C396,494 374,466 386,426 Z"/>
+  </g>
+
+  <rect x="585" y="286" width="230" height="98" rx="16" fill="url(#touchPad)" stroke="#3b475c" stroke-width="3"/>
+  <rect x="660" y="254" width="80" height="16" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+
+  <circle cx="595" cy="345" r="7" fill="#1e293b"/>
+  <circle cx="805" cy="345" r="7" fill="#1e293b"/>
+
+  <circle cx="595" cy="540" r="56" fill="url(#stick)" stroke="#4b5563" stroke-width="4"/>
+  <circle cx="595" cy="540" r="28" fill="#0b1220" stroke="#334155" stroke-width="3"/>
+
+  <circle cx="805" cy="540" r="56" fill="url(#stick)" stroke="#4b5563" stroke-width="4"/>
+  <circle cx="805" cy="540" r="28" fill="#0b1220" stroke="#334155" stroke-width="3"/>
+
+  <g transform="translate(460,450)">
+    <rect x="-20" y="-62" width="40" height="124" rx="9" fill="#0f172a" stroke="#475569" stroke-width="3"/>
+    <rect x="-62" y="-20" width="124" height="40" rx="9" fill="#0f172a" stroke="#475569" stroke-width="3"/>
+  </g>
+
+  <g transform="translate(944,450)">
+    <circle cx="0" cy="-38" r="26" fill="#111827" stroke="#64748b" stroke-width="3"/>
+    <circle cx="38" cy="0" r="26" fill="#111827" stroke="#64748b" stroke-width="3"/>
+    <circle cx="0" cy="38" r="26" fill="#111827" stroke="#64748b" stroke-width="3"/>
+    <circle cx="-38" cy="0" r="26" fill="#111827" stroke="#64748b" stroke-width="3"/>
+
+    <text x="0" y="-38" class="symbol" fill="#ec4899">&#9651;</text>
+    <text x="38" y="0" class="symbol" fill="#ef4444">&#9711;</text>
+    <text x="0" y="38" class="symbol" fill="#3b82f6">&#10005;</text>
+    <text x="-38" y="0" class="symbol" fill="#22c55e">&#9633;</text>
+  </g>
+
+  <g>
+    <rect x="464" y="260" width="94" height="20" rx="10" fill="#0b1220" stroke="#475569" stroke-width="2"/>
+    <rect x="842" y="260" width="94" height="20" rx="10" fill="#0b1220" stroke="#475569" stroke-width="2"/>
+    <rect x="450" y="230" width="122" height="20" rx="10" fill="#111827" stroke="#4b5563" stroke-width="2"/>
+    <rect x="828" y="230" width="122" height="20" rx="10" fill="#111827" stroke="#4b5563" stroke-width="2"/>
+  </g>
+
+  <rect x="620" y="382" width="160" height="10" rx="5" fill="#38bdf8" opacity="0.85"/>
+
+  <path class="callout" d="M463 205 C360 170, 258 170, 176 196"/>
+  <text x="56" y="206" class="callout-text">LT (Axis 4): Spread</text>
+
+  <path class="callout" d="M936 205 C1040 170, 1142 170, 1224 196"/>
+  <text x="1054" y="206" class="callout-text">RT (Axis 5): Tiro</text>
+
+  <path class="callout" d="M460 450 C332 438, 242 458, 168 502"/>
+  <text x="42" y="512" class="callout-text">Analogico Esq. X (Axis 0): Virar</text>
+
+  <path class="callout" d="M460 390 C336 344, 248 334, 168 344"/>
+  <text x="62" y="350" class="callout-text">Botao A (0): Acelerar</text>
+
+  <path class="callout" d="M982 450 C1110 442, 1198 468, 1274 518"/>
+  <text x="1068" y="530" class="callout-text">Botao B (1): Shield</text>
+
+  <path class="callout" d="M944 410 C1060 348, 1160 322, 1272 322"/>
+  <text x="1066" y="330" class="callout-text">Botao X (2): Hyperspace</text>
+
+  <path class="callout" d="M700 262 C700 198, 700 160, 700 130"/>
+  <text x="700" y="122" text-anchor="middle" class="callout-text">Botao Start/+ (7): Sair</text>
+
+  <rect x="50" y="620" width="1300" height="150" rx="16" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+  <text x="80" y="660" class="legend-text">Resumo Rapido:</text>
+  <text x="80" y="695" class="note">Acelerar: A (0) | Virar: Analogico esquerdo X (0) | Tiro: RT (5) | Spread: LT (4)</text>
+  <text x="80" y="724" class="note">Shield: B (1) | Hyperspace: X (2) | Sair: Start/+ (7) | Deadzone analogico: 0.3</text>
+</svg>
