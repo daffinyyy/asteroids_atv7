@@ -50,8 +50,10 @@ class Game:
         if C.MULTIPLAYER_ENABLED:
             joy_count = pg.joystick.get_count()
             if joy_count >= 2:
+                # Dois controles: desabilita jogador no teclado.
                 self.keyboard_player = 0
             elif joy_count == 1:
+                # Teclado fica com P1, único controle vai para P2.
                 self.keyboard_player = 1
                 self.joystick2 = self.joystick
                 self.joystick2_id = self.joystick_id
@@ -60,6 +62,7 @@ class Game:
                 self.joystick_id = None
                 self.joystick_index = None
             else:
+                # Sem controle: mantém apenas P1 no teclado.
                 self.keyboard_player = 1
 
         if C.RANDOM_SEED is not None:
@@ -97,11 +100,13 @@ class Game:
                         self.world = World()
                         self.scene = Scene("play")
 
+                    elif self.scene.name == "menu":
+                        self.world = World()
+                        self.scene = Scene("play")
                     elif self.scene.name == "game_over":
                         self.world = World()
                         self.go_fade = 0.0
                         self.scene = Scene("play")
-
                     elif self.scene.name == "play" and self.keyboard_player == 1:
                         # Apenas um jogador no teclado (P1)
                         if e.key == pg.K_SPACE:
@@ -197,32 +202,32 @@ class Game:
              C.WIDTH // 2 - 90, C.HEIGHT // 2 + 80)
 
     def draw_menu(self):
-           text(self.screen, self.big, "ASTEROIDS",
-               C.WIDTH // 2 - 150, 120)
-           if C.MULTIPLAYER_ENABLED:
-              text(self.screen, self.font,
-                  "P1 TECLADO: Setas  Space tiro  LShift hiper  S shield  RShift spread",
-                  50, 270)
-              text(self.screen, self.font,
-                  "CONTROLE: Analogico virar  A acelerar  RT tiro  LT spread  B shield  X hiper",
-                  50, 310)
-              if self.keyboard_player == 0:
-                 mode_txt = "Modo atual: 2 controles"
-              elif self.joystick2 is not None:
-                 mode_txt = "Modo atual: teclado + 1 controle"
-              else:
-                 mode_txt = "Modo atual: apenas teclado (conecte controle para P2)"
-              text(self.screen, self.font,
-                  mode_txt,
-                  260, 360)
-              text(self.screen, self.font,
-                  "Pressione qualquer tecla para iniciar", 240, 420)
-           else:
-              text(self.screen, self.font,
-                  "Setas: virar/acelerar  Espaco: tiro  LShift: hiper  S: shield",
-                  120, 300)
-              text(self.screen, self.font,
-                  "RShift: tiro espalhado (15s cooldown)",
-                  230, 330)
-              text(self.screen, self.font,
-                  "Pressione qualquer tecla...", 260, 390)
+        text(self.screen, self.big, "ASTEROIDS",
+             C.WIDTH // 2 - 150, 120)
+        if C.MULTIPLAYER_ENABLED:
+            text(self.screen, self.font,
+                 "P1 TECLADO: Setas  Space tiro  LShift hiper  S shield  RShift spread",
+                 50, 270)
+            text(self.screen, self.font,
+                 "CONTROLE: Analogico virar  A acelerar  RT tiro  LT spread  B shield  X hiper",
+                 50, 310)
+            if self.keyboard_player == 0:
+                mode_txt = "Modo atual: 2 controles"
+            elif self.joystick2 is not None:
+                mode_txt = "Modo atual: teclado + 1 controle"
+            else:
+                mode_txt = "Modo atual: apenas teclado (conecte controle para P2)"
+            text(self.screen, self.font,
+                 mode_txt,
+                 260, 360)
+            text(self.screen, self.font,
+                 "Pressione qualquer tecla para iniciar", 240, 420)
+        else:
+            text(self.screen, self.font,
+                 "Setas: virar/acelerar  Espaco: tiro  LShift: hiper  S: shield",
+                 120, 300)
+            text(self.screen, self.font,
+                 "RShift: tiro espalhado (15s cooldown)",
+                 230, 330)
+            text(self.screen, self.font,
+                 "Pressione qualquer tecla...", 260, 390)
